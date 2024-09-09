@@ -1,0 +1,62 @@
+---
+title: "Project 1"
+author: "Julia Martin"
+date: "9/9/2024"
+output: html_document
+---
+
+## Download Necessary Packages  
+
+```{r}
+library(tidyverse)
+if (!require("tidytuesdayR", quietly = TRUE)) {
+    install.packages("tidytuesdayR")
+}
+if (!require("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+if (!require("tidytuesdayR", quietly = TRUE)) {
+    remotes::install_github("dslc-io/tidytuesdayR")
+}
+
+library("here")
+library("tidyverse")
+```
+
+## Read in chocolate data  
+
+```{r}
+# tests if a directory named "data" exists locally
+if (!dir.exists(here("data"))) {
+    dir.create(here("data"))
+}
+
+# saves data only once (not each time you knit a R Markdown)
+if (!file.exists(here("data", "chocolate.RDS"))) {
+    url_csv <- "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-18/chocolate.csv"
+    chocolate <- readr::read_csv(url_csv)
+
+    # save the file to RDS objects
+    saveRDS(chocolate, file = here("data", "chocolate.RDS"))
+}
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+as_tibble(chocolate)
+glimpse(chocolate)
+```
+
+## Part 1  
+
+### 1  
+```{r}
+library(ggplot2)
+library(gridExtra)
+bin_default <- ggplot(chocolate, aes(x=rating)) + geom_histogram() + ggtitle("Default Bins")
+bins_10 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=10) + ggtitle("Bins = 10")
+bins_15 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=15) + ggtitle("Bins = 15")
+bins_20 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=20) + ggtitle("Bins = 20")
+bins_25 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=25) + ggtitle("Bins = 25")
+grid.arrange(bin_default, bins_10, bins_15, bins_20, bins_25, ncol=2)
+```
+When I change the number of bins to be greater, we can see a more precise distribtution of the ratings compared to when the number of bins is less. I think 15 bins looks the best because the bins are not too wide that they prevent specific trends in the ratings from being shown, but wide enough that there are not too many spaces between the columns.  
+
+### 2  
