@@ -60,3 +60,10 @@ grid.arrange(bin_default, bins_10, bins_15, bins_20, bins_25, ncol=2)
 When I change the number of bins to be greater, we can see a more precise distribtution of the ratings compared to when the number of bins is less. I think 15 bins looks the best because the bins are not too wide that they prevent specific trends in the ratings from being shown, but wide enough that there are not too many spaces between the columns.  
 
 ### 2  
+
+```{r}
+chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+   summarise(Freq = length(rating))
+```
+
