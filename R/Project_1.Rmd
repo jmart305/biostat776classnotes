@@ -57,7 +57,7 @@ bins_20 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=20) + ggtitle(
 bins_25 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=25) + ggtitle("Bins = 25")
 grid.arrange(bin_default, bins_10, bins_15, bins_20, bins_25, ncol=2)
 ```
-When I change the number of bins to be greater, we can see a more precise distribtution of the ratings compared to when the number of bins is less. I think 15 bins looks the best because the bins are not too wide that they prevent specific trends in the ratings from being shown, but wide enough that there are not too many spaces between the columns.  
+When I change the number of bins to be greater, we can see a more precise distribution of the ratings compared to when the number of bins is less. I think 15 bins looks the best because the bins are not too wide that they prevent specific trends in the ratings from being shown, but wide enough that there are not too many spaces between the columns.  
 
 ### 2  
 
@@ -145,12 +145,13 @@ It seems that the 60-70% range has the highest ratings, but in a few countries, 
 ```{r}
 install.packages("gapminder")
 library(gapminder)
-unique_gapminder <- gapminder %>% 
-  filter(year==2007)
-joint_frame <- left_join(chocolate,unique_gapminder[,1:2],by=c("country_of_bean_origin"="country"))
+gapminder_unique <- gapminder %>% 
+  distinct(country,.keep_all = T)
+
+joint_frame <- left_join(chocolate,gapminder_unique[,1:2],by=c("country_of_bean_origin"="country"))
 filtered <- joint_frame %>% 
   filter(is.na(continent)) 
-unique(filtered$country_of_bean_origin)
+unique(filtered$country_of_bean_origin) %in% gapminder$country
 gapminder[gapminder$country=="Congo",]
 
 unique(gapminder$continent)
@@ -158,6 +159,7 @@ Americas <- c("Belize","Grenada","Martinique", "St. Lucia", "U.S.A", "St.Vincent
 Oceania <- c("Fiji","Papua New Guinea","Vanuatu", "Solomon Islands", "Samoa", )
 Asia <- c("Burma", "Sumatra", "Sulawesi")
 Africa <- c("Sao Tome","Congo","Ivory Coast", "Sao Tome & Principe", "Principe", "DR Congo")
+
 
 ```
 
