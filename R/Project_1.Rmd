@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ## Download Necessary Packages  
-editing and testing
+
 ```{r}
 library(tidyverse)
 if (!require("tidytuesdayR", quietly = TRUE)) {
@@ -65,5 +65,16 @@ When I change the number of bins to be greater, we can see a more precise distri
 chocolate %>% 
   group_by(country_of_bean_origin) %>% 
    summarise(Freq = length(rating))
+```
+### 3
+
+```{r}
+chocolate %>% 
+  filter(country_of_bean_origin=="Ecuador") %>% 
+  summarise(mean_price = mean(price))
+
+chocolate %>% 
+  mean(rating)
+
 ```
 
