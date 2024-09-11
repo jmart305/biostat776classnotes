@@ -71,10 +71,93 @@ chocolate %>%
 ```{r}
 chocolate %>% 
   filter(country_of_bean_origin=="Ecuador") %>% 
-  summarise(mean_price = mean(price))
+    summarize(mean_rating = mean(rating), sd_rating = sd(rating), total=length(rating))
+```
+
+### 4
+
+```{r}
+chocolate %>% 
+  filter(country_of_bean_origin=="Ecuador") %>% 
+  group_by(company_location) %>% 
+  summarize(avg_rating = mean(rating)) %>% 
+  arrange(desc(avg_rating))
+```
+Australia makes the best chocolate with beans from Ecuador.  
+
+### 5 
+
+```{r}
+chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarize(avg_rating = mean(rating)) %>% 
+  arrange(desc(avg_rating)) %>% 
+  slice(1:3)
+```
+Tobago, China, and Sao Tome & Principe have the highest average ratings.  
+
+### 6
+
+```{r}
+country_greater_10 <- chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarise(Freq = length(rating)) %>% 
+  filter(!Freq<10)
 
 chocolate %>% 
-  mean(rating)
+  filter(country_of_bean_origin %in% country_greater_10$country_of_bean_origin) %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarize(avg_rating = mean(rating)) %>% 
+  arrange(desc(avg_rating)) %>% 
+  slice(1:3)
+```
+
+Now, the top 3 countries with the highest average ratings are Solomon Islands, Congo, and Cuba
+
+### 7
+
+```{r}
+country_greater_50 <- chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarise(Freq = length(rating)) %>% 
+  filter(!Freq<50)
+
+chocolate_percent_levels <- chocolate %>% 
+  filter(country_of_bean_origin %in% country_greater_50$country_of_bean_origin) %>% 
+  mutate(percent_group = as.factor(case_when(
+    as.numeric(substr(cocoa_percent, 1,2)) < 60 ~ "<60%",
+    as.numeric(substr(cocoa_percent, 1,2)) >= 60 & as.numeric(substr(cocoa_percent, 1,2)) < 70 ~ ">=60 to 70%",
+    as.numeric(substr(cocoa_percent, 1,2)) >= 70 & as.numeric(substr(cocoa_percent, 1,2)) < 90 ~ ">=70 to 90%",
+    as.numeric(substr(cocoa_percent, 1,2)) >= 90 ~ ">=90%"
+         )))
+
+levels(chocolate_percent_levels$percent_group)
+
+ggplot(chocolate_percent_levels, aes(percent_group,rating)) +
+  geom_boxplot() +
+  facet_wrap(~chocolate_percent_levels$country_of_bean_origin) + 
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.5)) + xlab("Chocolate Percentage") + ylab("Rating") + ggtitle("Ratings by Chocolate Percentage Groups for Countries with > 50 Reviews")
+```
+It seems that the 60-70% range has the highest ratings, but in a few countries, the 70-90% range ranks the highest.  
+
+## Part 2 
+
+```{r}
+install.packages("gapminder")
+library(gapminder)
+unique_gapminder <- gapminder %>% 
+  filter(year==2007)
+joint_frame <- left_join(chocolate,unique_gapminder[,1:2],by=c("country_of_bean_origin"="country"))
+filtered <- joint_frame %>% 
+  filter(is.na(continent)) 
+unique(filtered$country_of_bean_origin)
+gapminder[gapminder$country=="Congo",]
+
+unique(gapminder$continent)
+Americas <- c("Belize","Grenada","Martinique", "St. Lucia", "U.S.A", "St.Vincent-Grenadines", "Tobago", "Suriname")
+Oceania <- c("Fiji","Papua New Guinea","Vanuatu", "Solomon Islands", "Samoa", )
+Asia <- c("Burma", "Sumatra", "Sulawesi")
+Africa <- c("Sao Tome","Congo","Ivory Coast", "Sao Tome & Principe", "Principe", "DR Congo")
 
 ```
 
