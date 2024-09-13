@@ -133,33 +133,116 @@ chocolate_percent_levels <- chocolate %>%
 
 levels(chocolate_percent_levels$percent_group)
 
-ggplot(chocolate_percent_levels, aes(percent_group,rating)) +
+ggplot(chocolate_percent_levels, aes(percent_group,rating, color = percent_group)) +
   geom_boxplot() +
   facet_wrap(~chocolate_percent_levels$country_of_bean_origin) + 
-  theme(axis.text.x = element_text(angle = 60, vjust = 0.5)) + xlab("Chocolate Percentage") + ylab("Rating") + ggtitle("Ratings by Chocolate Percentage Groups for Countries with > 50 Reviews")
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.5)) + xlab("Chocolate Percentage") + ylab("Rating") + ggtitle("Ratings by Chocolate Percentage Groups for Countries with > 50 Reviews") 
+
+
+# DELETE THIS:
+#install.packages('devtools')
+#devtools::install_github('bbc/bbplot')
+#library(bbplot)
 ```
 It seems that the 60-70% range has the highest ratings, but in a few countries, the 70-90% range ranks the highest.  
 
 ## Part 2 
 
 ```{r}
+# load in gapminder data
 install.packages("gapminder")
 library(gapminder)
+
+# remove duplicate rows from gapminder
 gapminder_unique <- gapminder %>% 
   distinct(country,.keep_all = T)
 
+# join datasets
 joint_frame <- left_join(chocolate,gapminder_unique[,1:2],by=c("country_of_bean_origin"="country"))
-filtered <- joint_frame %>% 
+
+# only keep those with 10 or more reviews
+country_greater_10 <- joint_frame %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarise(Freq = length(rating)) %>% 
+  filter(!Freq<10)
+joint_frame <- joint_frame %>% 
+  filter(country_of_bean_origin %in% country_greater_10$country_of_bean_origin)
+
+# identify countries with missing continents
+missing_continent <- joint_frame %>% 
   filter(is.na(continent)) 
-unique(filtered$country_of_bean_origin) %in% gapminder$country
-gapminder[gapminder$country=="Congo",]
+unique(missing_continent$country_of_bean_origin)
 
-unique(gapminder$continent)
-Americas <- c("Belize","Grenada","Martinique", "St. Lucia", "U.S.A", "St.Vincent-Grenadines", "Tobago", "Suriname")
-Oceania <- c("Fiji","Papua New Guinea","Vanuatu", "Solomon Islands", "Samoa", )
-Asia <- c("Burma", "Sumatra", "Sulawesi")
-Africa <- c("Sao Tome","Congo","Ivory Coast", "Sao Tome & Principe", "Principe", "DR Congo")
+# fill in missing continents
+Americas <- c("Belize","Grenada", "St. Lucia", "U.S.A.","Trinidad")
+Oceania <- c("Fiji","Papua New Guinea","Vanuatu", "Solomon Islands")
+Africa <- c("Congo", "Principe", "Sao Tome")
 
+joint_frame$continent[joint_frame$country_of_bean_origin %in% Americas] <- "Americas"
+joint_frame$continent[joint_frame$country_of_bean_origin %in% Oceania] <- "Oceania"
+joint_frame$continent[joint_frame$country_of_bean_origin %in% Africa] <- "Africa"
 
+# remove "Blend"
+joint_frame_noblend <- joint_frame %>% 
+  filter(!country_of_bean_origin=="Blend")
+
+# create violin plots
+ggplot(joint_frame_noblend, aes(continent,rating)) +
+  geom_violin(color = "#7A490A",fill="#7A490A") + 
+  theme(axis.text.x = element_text(size=12)) + xlab("Continent") + ylab("Rating") + ggtitle("Chocolate Ratings by Continent")
 ```
+
+### Part 3 
+
+## 1 Create indicator columns for ingredients 
+
+```{r}
+library(stringr)
+ingred <- c("beans", "sugar", "cocoa_butter", "vanilla", "letchin", "salt")
+abbrev <- c("B","S","C","V","L","Sa")
+chocolate_ingred <- chocolate %>% 
+  mutate(beans = if_else(str_detect(ingredients,"B"),1,0, missing = 0
+  )) %>% 
+  mutate(sugar = if_else(str_detect(ingredients,"S,|S$"),1,0, missing = 0
+  )) %>% 
+  mutate(cocoa_butter = if_else(str_detect(ingredients,"C"),1,0, missing = 0
+  )) %>% 
+  mutate(vanilla = if_else(str_detect(ingredients,"V"),1,0, missing = 0
+  )) %>%  
+  mutate(letchin = if_else(str_detect(ingredients,"L"),1,0, missing = 0
+  )) %>% 
+  mutate(salt = if_else(str_detect(ingredients,"Sa"),1,0, missing = 0
+  ))
+
+chocolate_ingred %>% 
+  filter(str_detect(ingredients,"S"))
+```
+## 2 Create indicator columns for characteristics 
+
+```{r}
+chocolate_char <- chocolate_ingred %>% 
+  mutate(char_sweet = if_else(str_detect(most_memorable_characteristics,"sweet"),1,0)) %>% 
+  mutate(char_cocoa = if_else(str_detect(most_memorable_characteristics,"cocoa"),1,0)) %>% 
+  mutate(char_nutty = if_else(str_detect(most_memorable_characteristics,"nutty"),1,0)) %>% 
+  mutate(char_roasty = if_else(str_detect(most_memorable_characteristics,"roasty"),1,0)) %>% 
+  mutate(char_creamy = if_else(str_detect(most_memorable_characteristics,"creamy"),1,0)) %>% 
+  mutate(char_earthy = if_else(str_detect(most_memorable_characteristics,"earthy"),1,0))
+```
+
+## 3 Calculate means 
+
+```{r}
+#beans, sugar, cocoa_butter, vanilla, letchin, and salt
+#char_cocoa, char_sweet, char_nutty, char_creamy, char_roasty, char_earthy
+chocolate_means <- chocolate_char %>% 
+  group_by(review_date) %>% 
+  summarize(beans = mean(beans), sugar = mean(sugar), cocoa_butter = mean(cocoa_butter), vanilla = mean(vanilla), letchin = mean(letchin), salt = mean(salt), char_cocoa = mean(char_cocoa), char_sweet = mean(char_sweet), char_nutty = mean(char_nutty), char_creamy = mean(char_creamy), char_roasty = mean(char_roasty), char_earthy = mean(char_earthy))
+```
+## 4 Convert into a long dataset
+
+```{r}
+chocolate_means %>% 
+  pivot_longer(-review_date, names_to = "feature", values_to = "mean_score")
+```
+
 
