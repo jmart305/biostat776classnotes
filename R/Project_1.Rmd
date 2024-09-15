@@ -150,7 +150,7 @@ It seems that the 60-70% range has the highest ratings, but in a few countries, 
 
 ```{r}
 # load in gapminder data
-install.packages("gapminder")
+#install.packages("gapminder")
 library(gapminder)
 
 # remove duplicate rows from gapminder
@@ -241,8 +241,58 @@ chocolate_means <- chocolate_char %>%
 ## 4 Convert into a long dataset
 
 ```{r}
-chocolate_means %>% 
+chocolate_long <- chocolate_means %>% 
   pivot_longer(-review_date, names_to = "feature", values_to = "mean_score")
+chocolate_long
 ```
+
+### Part 3
+
+```{r}
+ggplot(chocolate_long, aes(review_date, mean_score)) +
+  geom_point() +
+  facet_wrap(~feature, labeller = as_labeller(c(`beans` = "Ingredient: Beans", `char_cocoa` = "Characteristic: Cocoa", `char_creamy` = "Characteristic: Creamy", `char_earthy` = "Characteristic: Earthy", `char_nutty` = "Characteristic: Nutty", `char_roasty` = "Characteristic: Roasty", `char_sweet` = "Characteristic: Sweet", `cocoa_butter` = "Ingredient: Cocoa Butter", `letchin` = "Ingredient: Letchin", `salt` = "Ingredient: Salt", `sugar` = "Ingredient: Sugar", `vanilla` = "Ingredient: Vanilla"))) + ggtitle("Chocolate Features Over Time from 2006-2021") + xlab("Review Date (Year)") +   ylab("Mean Score (1 = present, 0 = absent)") + labs(subtitle = str_wrap("Key Trends: Use of vanilla, letchin, and cocoa butter in chocolate has declined from 2006 to 2021; beans are used in almost all chocolates and salt is used in very few chocolates",width=100), caption = "Made by Julia Martin") + geom_smooth(color="#7A490A") + theme_minimal()
+
+```
+### Part 5 
+
+```{r}
+ggplot(chocolate, aes(country_of_bean_origin, company_location,color="red")) + 
+  geom_point() + labs(title = "company location vs country of bean origin") + theme(title = element_text(size=2),axis.title.x = element_text(size=50), axis.title.y = element_text(size=50), panel.background = element_rect(fill = 'red2',color="yellow"),legend.position = "inside") + facet_wrap(~rating)
+```
+1. Title has very small font size and axis labels have very large font sizes. The poor choice of font size for these elements makes them very hard to read these important pieces of information on these plots.  
+2. The axis labels are unreadable since they overlap. There are too many different ticks to put on one plot for it to be readable. Graphs should not have this many ticks on each axis because it is too hard to digest.
+3. This graph plots a categorical variable with another categorical variable using a scatterplot, which isn't very useful for this type of data. Scatterplots typically work better when there is a numeric variable. This plot does not really tell us any information about the data.
+4. The color of the points and the background color make it very hard to see the points, since the background color is very close to the color of the points. The background color should make the color of the points pop so that they are easily visible to the viewer.
+5. The legend just reads "red" which doesn't give us any information and just makes more confusing.
+6. The plot is faceted by rating, but there are no labels to explain this so the view does not know what the plot is faceted by. It should be clear what the different facets are when using facet_wrap.
+7. The legend is placed directly inside of the plot, which blocks the data points. The legend should always be placed on the side, top, or bottom of the plot so that it does not block the graph itself. 
+
+### Part 6 
+
+```{r}
+chocolate %>%
+    ggplot(aes(
+        x = as.factor(review_date),
+        y = rating,
+        fill = review_date
+    )) +
+    geom_violin(color = "#7A490A",fill="#7A490A") +
+    labs(title = "Chocolate Ratings by Year from 2006-2021") + 
+    ylab("Rating (0-5)") + 
+    xlab("Review Date") + 
+    theme(axis.text.x = element_text(size=10,angle=25, family = "Optima"), title = element_text(family="Optima",size = 14), panel.grid.major = element_blank(), axis.text.y = element_text(family = "Optima")) + guides(fill=guide_legend(title="Review Date")) + 
+   stat_summary(fun= "mean", geom="point", color="white") + 
+   ylim(1,4) + guides(fill="none") + 
+   labs(subtitle = str_wrap("White point indicates the means rating for each year; ratings have gone up slighly over time"))
+```
+1. I added a title to the plot to inform the viewer what it is about.  
+2. I changed the axis titles to be more informative instead of just the variable name and to exclude the as.factor() function in the name.  
+3. I changed the font to something different than the default to make the plot stand out.  
+4. I changed the color to be something on theme for chocolate and got rid of the legend because I don't feel that color scaling in this plot added any useful information. This also makes the whole graph wider which makes the violin plots easy to view.  
+5. I added a point on each violin plot that represents the mean rating for each year, which gives some added information on the data.  
+6. I added a subtitle with key findings.  
+7. I made the x axis labels (years) tilted so that they are slighlty easier to read.  
+
 
 
