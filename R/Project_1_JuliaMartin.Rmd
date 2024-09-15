@@ -1,0 +1,304 @@
+---
+title: "Project 1"
+author: "Julia Martin"
+date: "9/9/2024"
+output: html_document
+bibliography: my-refs.bib
+nocite: '@*'
+---
+
+### Download Necessary Packages  
+
+```{r}
+library(tidyverse)
+if (!require("tidytuesdayR", quietly = TRUE)) {
+    install.packages("tidytuesdayR")
+}
+if (!require("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+if (!require("tidytuesdayR", quietly = TRUE)) {
+    remotes::install_github("dslc-io/tidytuesdayR")
+}
+
+library("here")
+library("remotes")
+library("tidytuesdayR")
+```
+
+### Read in chocolate data  
+
+```{r}
+# tests if a directory named "data" exists locally
+if (!dir.exists(here("data"))) {
+    dir.create(here("data"))
+}
+
+# saves data only once (not each time you knit a R Markdown)
+if (!file.exists(here("data", "chocolate.RDS"))) {
+    url_csv <- "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-18/chocolate.csv"
+    chocolate <- readr::read_csv(url_csv)
+
+    # save the file to RDS objects
+    saveRDS(chocolate, file = here("data", "chocolate.RDS"))
+}
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+as_tibble(chocolate)
+glimpse(chocolate)
+```
+
+## Part 1  
+
+### 1.    
+```{r}
+library(ggplot2)
+library(gridExtra)
+bin_default <- ggplot(chocolate, aes(x=rating)) + geom_histogram() + ggtitle("Default Bins")
+bins_10 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=10) + ggtitle("Bins = 10")
+bins_15 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=15) + ggtitle("Bins = 15")
+bins_20 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=20) + ggtitle("Bins = 20")
+bins_25 <- ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=25) + ggtitle("Bins = 25")
+grid.arrange(bin_default, bins_10, bins_15, bins_20, bins_25, ncol=2)
+```
+
+When I change the number of bins to be greater, we can see a more precise distribution of the ratings compared to when the number of bins is less. I think 15 bins looks the best because the bins are not too wide that they prevent specific trends in the ratings from being shown, but wide enough that there are not too many spaces between the columns.  
+
+### 2.    
+
+```{r}
+chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+   summarise(Freq = length(rating)) %>% 
+   print(n = 100)
+```
+### 3.  
+
+```{r}
+chocolate %>% 
+  filter(country_of_bean_origin=="Ecuador") %>% 
+    summarize(mean_rating = mean(rating), sd_rating = sd(rating), total=length(rating))
+```
+
+### 4.  
+
+```{r}
+chocolate %>% 
+  filter(country_of_bean_origin=="Ecuador") %>% 
+  group_by(company_location) %>% 
+  summarize(avg_rating = mean(rating)) %>% 
+  arrange(desc(avg_rating))
+```
+Australia makes the best chocolate with beans from Ecuador.  
+
+### 5.   
+
+```{r}
+chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarize(avg_rating = mean(rating)) %>% 
+  arrange(desc(avg_rating)) %>% 
+  slice(1:3)
+```
+Tobago, China, and Sao Tome & Principe have the highest average ratings.  
+
+### 6.  
+
+```{r}
+country_greater_10 <- chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarise(Freq = length(rating)) %>% 
+  filter(!Freq<10)
+
+chocolate %>% 
+  filter(country_of_bean_origin %in% country_greater_10$country_of_bean_origin) %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarize(avg_rating = mean(rating)) %>% 
+  arrange(desc(avg_rating)) %>% 
+  slice(1:3)
+```
+
+Now, the top 3 countries with the highest average ratings are Solomon Islands, Congo, and Cuba
+
+### 7.  
+
+```{r}
+country_greater_50 <- chocolate %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarise(Freq = length(rating)) %>% 
+  filter(!Freq<50)
+
+chocolate_percent_levels <- chocolate %>% 
+  filter(country_of_bean_origin %in% country_greater_50$country_of_bean_origin) %>% 
+  mutate(percent_group = as.factor(case_when(
+    as.numeric(substr(cocoa_percent, 1,2)) < 60 ~ "<60%",
+    as.numeric(substr(cocoa_percent, 1,2)) >= 60 & as.numeric(substr(cocoa_percent, 1,2)) < 70 ~ ">=60 to 70%",
+    as.numeric(substr(cocoa_percent, 1,2)) >= 70 & as.numeric(substr(cocoa_percent, 1,2)) < 90 ~ ">=70 to 90%",
+    as.numeric(substr(cocoa_percent, 1,2)) >= 90 ~ ">=90%"
+         )))
+
+levels(chocolate_percent_levels$percent_group)
+
+ggplot(chocolate_percent_levels, aes(percent_group,rating, color = percent_group)) +
+  geom_boxplot() +
+  facet_wrap(~chocolate_percent_levels$country_of_bean_origin) + 
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.5)) + xlab("Chocolate Percentage") + ylab("Rating") + ggtitle("Ratings by Chocolate Percentage Groups for Countries with at least 50 Reviews") + labs(color='Percent Group') 
+```
+
+It seems that the 60-70% range has the highest ratings, but in a few countries, the 70-90% range ranks the highest. For example, in Belize, Nicaragua, Brazil, and Mexico, the 70-90% range ranks the highest, which is different from most of the other countries.
+
+## Part 2 
+
+```{r}
+# load in gapminder data
+#install.packages("gapminder")
+library(gapminder)
+
+# remove duplicate rows from gapminder
+gapminder_unique <- gapminder %>% 
+  distinct(country,.keep_all = T)
+
+# join datasets
+joint_frame <- left_join(chocolate,gapminder_unique[,1:2],by=c("country_of_bean_origin"="country"))
+
+# only keep those with 10 or more reviews
+country_greater_10 <- joint_frame %>% 
+  group_by(country_of_bean_origin) %>% 
+  summarise(Freq = length(rating)) %>% 
+  filter(!Freq<10)
+joint_frame <- joint_frame %>% 
+  filter(country_of_bean_origin %in% country_greater_10$country_of_bean_origin)
+
+# identify countries with missing continents
+missing_continent <- joint_frame %>% 
+  filter(is.na(continent)) 
+unique(missing_continent$country_of_bean_origin)
+
+# fill in missing continents
+Americas <- c("Belize","Grenada", "St. Lucia", "U.S.A.","Trinidad")
+Oceania <- c("Fiji","Papua New Guinea","Vanuatu", "Solomon Islands")
+Africa <- c("Congo", "Principe", "Sao Tome")
+
+joint_frame$continent[joint_frame$country_of_bean_origin %in% Americas] <- "Americas"
+joint_frame$continent[joint_frame$country_of_bean_origin %in% Oceania] <- "Oceania"
+joint_frame$continent[joint_frame$country_of_bean_origin %in% Africa] <- "Africa"
+
+# remove "Blend"
+joint_frame_noblend <- joint_frame %>% 
+  filter(!country_of_bean_origin=="Blend")
+
+# create violin plots
+ggplot(joint_frame_noblend, aes(continent,rating)) +
+  geom_violin(color = "#7A490A",fill="#7A490A") + 
+  theme(axis.text.x = element_text(size=12)) + xlab("Continent") + ylab("Rating") + ggtitle("Chocolate Ratings by Continent")
+```
+
+## Part 3 
+
+### 1. Create indicator columns for ingredients 
+
+```{r}
+library(stringr)
+ingred <- c("beans", "sugar", "cocoa_butter", "vanilla", "letchin", "salt")
+abbrev <- c("B","S","C","V","L","Sa")
+chocolate_ingred <- chocolate %>% 
+  mutate(beans = if_else(str_detect(ingredients,"B"),1,0, missing = 0
+  )) %>% 
+  mutate(sugar = if_else(str_detect(ingredients,"S,|S$"),1,0, missing = 0
+  )) %>% 
+  mutate(cocoa_butter = if_else(str_detect(ingredients,"C"),1,0, missing = 0
+  )) %>% 
+  mutate(vanilla = if_else(str_detect(ingredients,"V"),1,0, missing = 0
+  )) %>%  
+  mutate(letchin = if_else(str_detect(ingredients,"L"),1,0, missing = 0
+  )) %>% 
+  mutate(salt = if_else(str_detect(ingredients,"Sa"),1,0, missing = 0
+  ))
+
+chocolate_ingred %>% 
+  filter(str_detect(ingredients,"S"))
+```
+### 2. Create indicator columns for characteristics 
+
+```{r}
+chocolate_char <- chocolate_ingred %>% 
+  mutate(char_sweet = if_else(str_detect(most_memorable_characteristics,"sweet"),1,0)) %>% 
+  mutate(char_cocoa = if_else(str_detect(most_memorable_characteristics,"cocoa"),1,0)) %>% 
+  mutate(char_nutty = if_else(str_detect(most_memorable_characteristics,"nutty"),1,0)) %>% 
+  mutate(char_roasty = if_else(str_detect(most_memorable_characteristics,"roasty"),1,0)) %>% 
+  mutate(char_creamy = if_else(str_detect(most_memorable_characteristics,"creamy"),1,0)) %>% 
+  mutate(char_earthy = if_else(str_detect(most_memorable_characteristics,"earthy"),1,0))
+```
+
+### 3. Calculate means 
+
+```{r}
+#beans, sugar, cocoa_butter, vanilla, letchin, and salt
+#char_cocoa, char_sweet, char_nutty, char_creamy, char_roasty, char_earthy
+chocolate_means <- chocolate_char %>% 
+  group_by(review_date) %>% 
+  summarize(beans = mean(beans), sugar = mean(sugar), cocoa_butter = mean(cocoa_butter), vanilla = mean(vanilla), letchin = mean(letchin), salt = mean(salt), char_cocoa = mean(char_cocoa), char_sweet = mean(char_sweet), char_nutty = mean(char_nutty), char_creamy = mean(char_creamy), char_roasty = mean(char_roasty), char_earthy = mean(char_earthy))
+```
+### 4. Convert into a long dataset
+
+```{r}
+chocolate_long <- chocolate_means %>% 
+  pivot_longer(-review_date, names_to = "feature", values_to = "mean_score")
+chocolate_long %>% print(n=20)
+```
+
+## Part 4
+
+```{r}
+ggplot(chocolate_long, aes(review_date, mean_score)) +
+  geom_point() +
+  facet_wrap(~feature, labeller = as_labeller(c(`beans` = "Ingredient: Beans", `char_cocoa` = "Characteristic: Cocoa", `char_creamy` = "Characteristic: Creamy", `char_earthy` = "Characteristic: Earthy", `char_nutty` = "Characteristic: Nutty", `char_roasty` = "Characteristic: Roasty", `char_sweet` = "Characteristic: Sweet", `cocoa_butter` = "Ingredient: Cocoa Butter", `letchin` = "Ingredient: Letchin", `salt` = "Ingredient: Salt", `sugar` = "Ingredient: Sugar", `vanilla` = "Ingredient: Vanilla"))) + ggtitle("Chocolate Features Over Time from 2006-2021") + xlab("Review Date (Year)") +   ylab("Mean Score (1 = present, 0 = absent)") + labs(subtitle = str_wrap("Key Trends: Use of vanilla, letchin, and cocoa butter in chocolate has declined from 2006 to 2021; beans are used in almost all chocolates and salt is used in very few chocolates",width=95), caption = "Made by Julia Martin") + geom_smooth(color="#7A490A") + theme_minimal()
+
+```
+
+## Part 5 
+
+```{r}
+ggplot(chocolate, aes(country_of_bean_origin, company_location,color="red")) + 
+  geom_point() + labs(title = "company location vs country of bean origin") + theme(title = element_text(size=2),axis.title.x = element_text(size=50), axis.title.y = element_text(size=50), panel.background = element_rect(fill = 'red2',color="yellow"),legend.position = "inside", strip.background=element_rect(fill="black"),strip.text = element_text(color="grey30")) + facet_wrap(~rating)
+```
+
+1. Title has very small font size and axis labels have very large font sizes. The poor choice of font size for these elements makes them very hard to read these important pieces of information on these plots.  
+2. The axis labels are unreadable since they overlap. There are too many different ticks to put on one plot for it to be readable. Graphs should not have this many ticks on each axis because it is too hard to digest.  
+3. This graph plots a categorical variable with another categorical variable using a scatterplot, which isn't very useful for this type of data. Scatterplots typically work better when there is a numeric variable. This plot does not really tell us any information about the data.  
+4. The color of the background makes it very hard to read the facet labels. The facet labels need to be easily visible as they display important information.  
+5. The legend just reads "red" which doesn't give us any information and just makes more confusing.  
+6. The plot is faceted by rating, but there are no labels to explain this so the view does not show what the plot is faceted by. It should be clear what the different facets are when using facet_wrap.  
+7. The legend is placed directly inside of the plot, which blocks the data points. The legend should always be placed on the side, top, or bottom of the plot so that it does not block the graph itself.  
+
+## Part 6 
+
+```{r}
+chocolate %>%
+    ggplot(aes(
+        x = as.factor(review_date),
+        y = rating,
+        fill = review_date
+    )) +
+    geom_violin(color = "#7A490A",fill="#7A490A") +
+    labs(title = "Chocolate Ratings by Year from 2006-2021") + 
+    ylab("Rating (0-5)") + 
+    xlab("Review Date") + 
+    theme(axis.text.x = element_text(size=10,angle=25, family = "Optima"), title = element_text(family="Optima",size = 14), panel.grid.major = element_blank(), axis.text.y = element_text(family = "Optima")) + guides(fill=guide_legend(title="Review Date")) + 
+   stat_summary(fun= "mean", geom="point", color="white") + 
+   ylim(1,4) + guides(fill="none") + 
+   labs(subtitle = str_wrap("White points indicate the mean rating for each year; ratings have gone up slighly over time"))
+```
+
+1. I added a title to the plot to inform the viewer what it is about.  
+2. I changed the axis titles to be more informative instead of just the variable name and to exclude the as.factor() function in the name.  
+3. I changed the font to something different than the default to make the plot stand out.  
+4. I changed the color to be something on theme for chocolate and got rid of the legend because I don't feel that color scaling in this plot added any useful information. This also makes the whole graph wider which makes the violin plots easier to read.    
+5. I added a point on each violin plot that represents the mean rating for each year, which gives some added information on the data.  
+6. I added a subtitle with key findings.  
+7. I made the x axis labels (years) tilted so that they are slightly easier to read.  
+
+
+### Citations
+
+
+
