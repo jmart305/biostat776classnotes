@@ -3,6 +3,8 @@ title: "Project 1"
 author: "Julia Martin"
 date: "9/9/2024"
 output: html_document
+bibliography: my-refs.bib
+nocite: '@*'
 ---
 
 ## Download Necessary Packages  
@@ -21,6 +23,8 @@ if (!require("tidytuesdayR", quietly = TRUE)) {
 
 library("here")
 library("tidyverse")
+library("remotes")
+library("tidytuesdayR")
 ```
 
 ## Read in chocolate data  
@@ -293,6 +297,9 @@ chocolate %>%
 5. I added a point on each violin plot that represents the mean rating for each year, which gives some added information on the data.  
 6. I added a subtitle with key findings.  
 7. I made the x axis labels (years) tilted so that they are slighlty easier to read.  
+
+
+### Citations
 
 
 
