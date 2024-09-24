@@ -4,7 +4,38 @@ output: html_document
 date: "2024-09-24"
 ---
 
-```{r}
+### Call necessary packages
 
+```{r}
+library(tidyverse)
+library(tidytuesdayR)
 ```
 
+## Part 1
+
+### Part 1A: Exponential transformation
+
+```{r}
+Exp <- function(x, k) {
+    series <- rep(NA,k+1)
+    for(i in 0:k) {
+      series[i+1] <- (x^i) / factorial(i)
+    }
+    sum(series)
+}
+```
+
+### Part 1B: Sample mean and sample standard deviation
+
+```{r}
+sample_mean <- function(x) {
+    sum(x) / length(x)
+}
+
+sample_sd <- function(x) {
+    xbar <- sum(x) / length(x)
+    sqrt(sum((x - xbar)^2) / (length(x)-1))
+}
+```
+
+### Part 1C: Confidence intervals 
