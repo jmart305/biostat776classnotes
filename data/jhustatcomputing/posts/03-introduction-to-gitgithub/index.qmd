@@ -1,0 +1,238 @@
+---
+title: "03 - Introduction to git/GitHub"
+author:
+  - name: Leonardo Collado Torres
+    url: http://lcolladotor.github.io/
+    affiliations:
+      - id: libd
+        name: Lieber Institute for Brain Development
+        url: https://libd.org/
+      - id: jhsph
+        name: Johns Hopkins Bloomberg School of Public Health Department of Biostatistics
+        url: https://publichealth.jhu.edu/departments/biostatistics
+description: "Version control is a game changer; or how I learned to love git/GitHub"
+image: "../../images/happygitwithr.png"
+categories: [module 1, week 1, programming, version control, git, GitHub]
+---
+
+*This lecture, as the rest of the course, is adapted from the version [Stephanie C. Hicks](https://www.stephaniehicks.com/) designed and maintained in 2021 and 2022. Check the recent changes to this file through the `r paste0("[GitHub history](https://github.com/lcolladotor/jhustatcomputing/commits/main/", basename(dirname(getwd())), "/", basename(getwd()), "/index.qmd)")`.*
+
+<!-- Add interesting quote -->
+
+# Pre-lecture materials
+
+### Read ahead
+
+::: callout-note
+## Read ahead
+
+**Before class, you can prepare by reading the following materials:**
+
+1.  [Happy Git with R](https://happygitwithr.com) from Jenny Bryan
+2.  [Chapter on git and GitHub in `dsbook`](https://rafalab.github.io/dsbook/git.html) from Rafael Irizarry
+:::
+
+### Acknowledgements
+
+Material for this lecture was borrowed and adopted from
+
+-   <https://andreashandel.github.io/MADAcourse>
+
+# Learning objectives
+
+::: callout-note
+# Learning objectives
+
+**At the end of this lesson you will:**
+
+-   Know what Git and GitHub are.
+-   Know why one might want to use them.
+-   Have created and set up a GitHub account.
+:::
+
+# Introduction to `git`/GitHub
+
+This document gives a brief explanation of GitHub and how we will use it for this course.
+
+### git
+
+*Git* is what is called a *version control system* for file management. The main idea is that as you (and your collaborators) work on a project, the software tracks, and records any changes made by anyone.
+
+-   Similar to the "track changes" features in Microsoft Word, but more rigorous, powerful, and scaled up to multiple files
+-   Great for solo or collaborative work
+
+### GitHub
+
+*GitHub* is a hosting service on internet for `git`-aware folders and projects
+
+-   Similar to the DropBox or Google, but more structured, powerful, and programmatic
+-   Great for solo or collaborative work!
+-   Technically *GitHub* is distinct from *Git*. However, *GitHub* is in some sense the interface and *Git* the underlying engine (a bit like *RStudio* and *R*).
+
+Note that other interfaces to *Git* exist, e.g., *Bitbucket*, but *GitHub* is the most widely used one.
+
+### Why use git/GitHub?
+
+You want to use `git` + *GitHub* to avoid this:
+
+```{r}
+#| label: versioncontrol
+#| echo: false
+#| fig-cap: 'How not to use GitHub [image from PhD Comics]'
+#| out-width: '80%'
+knitr::include_graphics("../../images/phdversioncontrol.gif")
+```
+
+\[[Source: PhD Comics](http://phdcomics.com/comics/archive_print.php?comicid=1531)\]
+
+`git` + *GitHub* gives you a clean way to track your projects. It is also very well suited to collaborative work. Historically, version control was used for software development. However, it has become broader and is now used for many types of projects, including data science projects.
+
+To learn a bit more about Git/GitHub and why you might want to use it, [read this article by Jenny Bryan](https://peerj.com/preprints/3159/).
+
+**Note her explanation of what's special with the `README.md` file on GitHub.**
+
+### What to (not) do
+
+`git` + **GitHub is ideal if** you have a project with a fair number of files, most of those files are text files (such as code, $LaTeX$, (R)markdown, etc.) and different people work on different parts of the project.
+
+`git` + **GitHub is less useful if** you have a lot of non-text files (e.g. Word or Powerpoint) and different team members might want to edit the same document at the same time. In that instance, a solution like Google Docs, Word+Dropbox, Word+Onedrive, etc. might be better.
+
+### How to use Git/GitHub
+
+Git and GitHub is fundamentally **based on commands you type into the command line**. Lots of online resources show you how to use the command line. This is the most powerful, and the way I almost always interact with git/GitHub. However, many folks find this the most confusing way to use git/GitHub. Alternatively, there are graphical interfaces.
+
+-   [GitHub itself](https://desktop.github.com/) provides a grapical interface with basic functionality.
+-   RStudio also has [Git/GitHub integration](https://happygitwithr.com/rstudio-git-github.html). Of course this only works for R project GitHub integration.
+-   There are also third party GitHub clients with many advanced features, most of which you won't need initially, but might eventually.
+
+**Note**: As student, you can (and should) upgrade to the Pro version of GitHub for free (i.e. access to unlimited private repositories is one benefit), see the [GitHub student developer pack](https://education.github.com/pack) on how to do this.
+
+We will mostly be using Git commands through the RStudio Git panel. This panel will show up by default if RStudio recognizes that you have installed Git already.
+
+# Getting Started
+
+One of my favorite resources for getting started with git/GitHub is the Happy Git with R from [Jenny Bryan](https://twitter.com/JennyBryan):
+
+-   <https://happygitwithr.com>
+
+```{r}
+#| label: happygitwithr
+#| echo: false
+#| fig-cap: 'A screenshot of the Happy Git with R online book from Jenny Bryan'
+#| out-width: '80%'
+knitr::include_graphics("../../images/happygitwithr.png")
+```
+
+It truly is one of the **best resources** out there for getting started with git/GitHub, especially with the integration to RStudio. Therefore, at this point, I will encourage all of you to go read through the online book.
+
+Some of you may only need to skim it, others will need to spend some time reading through it. Either way, I will bet that you won't regret the time investment.
+
+Alternatively, check the [git to know git: an 8 minute introduction](https://research.libd.org/rstatsclub/2018/04/17/git-to-know-git/) blog post by [Amy Peterson](https://amy-peterson.github.io/).
+
+# Using git/GitHub in our course
+
+In this course, you will use git/GitHub in the following ways:
+
+1.  Project 0 (optional) - You will create a website introducing yourself to folks in the course and deploy it on GitHub.
+2.  Projects 1-3 - You can practice using git locally (on your compute environment) to track your changes over time and, if you wish (but highly suggested), you can practice pushing your project solutions to a private GitHub repository on your GitHub account (i.e. `git add`, `git commit`, `git push`, `git pull`, etc) .
+
+Learning these skills will be useful down the road if you ever work collaboratively on a project (i.e. writing code as a group). In this scenario, you will use the skills you have been practicing in your projects to work together as a team in a single GitHub repository.
+
+If you want to make a public `git` repository and share it via GitHub with your class notes, akin to <https://github.com/lcolladotor/biostat776classnotes>, you can do so with:
+
+```{r}
+#| eval: false
+## Install "usethis" if you don't have it already
+if (!requireNamespace("usethis", quietly = TRUE)) {
+    install.packages("usethis")
+}
+
+usethis::create_project("~/Desktop/biostat776classnotes")
+
+## Then in your new RStudio project, run the following:
+usethis::use_git()
+usethis::use_github()
+```
+
+Check [Project 0](../../projects/project-0/) for more details on how to configure `usethis` so it can recognize who you are on `git`/GitHub and how to access your GitHub account.
+
+# "Help me help you": `reprex::reprex()`
+
+Install the `reprex` R package.
+
+```{r}
+#| eval: false
+install.packages("reprex")
+```
+
+![](https://reprex.tidyverse.org/reference/figures/help-me-help-you.png)
+
+We'll learn more about reproducible code soon. But in the meantime, you will definitely want to learn about `reprex: Prepare Reproducible Example Code via the Clipboard`.
+
+As a quick exercise:
+
+1.  Install `reprex`
+
+2.  Log in to your GitHub account and access <https://github.com/lcolladotor/jhustatcomputing/issues/7>
+
+3.  Copy paste the following R code `stop("This R error is weird")`.
+
+4.  Type `reprex::reprex()` in your R console.
+
+5.  Paste the output into <https://github.com/lcolladotor/jhustatcomputing/issues/7> and click on the "comment" green button.
+
+Here is an actual example where I used `reprex` to ask a question: <https://github.com/Bioconductor/BiocFileCache/issues/48>.
+
+For more details on `reprex`, check this video:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/8bBo3B7N8YQ?si=HQRqLn--9KTNKDcY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
+
+</iframe>
+
+[Here's a nice comment](https://github.com/tidyverse/tidy-dev-day/issues/25#issuecomment-2233564971) from [Hadley Wickham](https://twitter.com/hadleywickham) about an issue I made:
+
+> @hadley: A good example of a very detailed issue is [r-lib/pkgdown#2727](https://github.com/r-lib/pkgdown/issues/2727)
+
+Note the use of the R session information from `sessioninfo::session_info()` along with `reprex::reprex()`.
+
+Note the use of:
+
+```         
+<details>
+
+Anything you want here, that you want to hide under a little toggle.
+This can be useful to include more information that can be useful, 
+but could interrupt the flow of the narrative that you are trying
+to convey.
+
+</details>
+```
+
+# Post-lecture materials
+
+### Final Questions
+
+Here are some post-lecture questions to help you think about the material discussed.
+
+::: callout-note
+### Questions
+
+1.  What is version control?
+
+2.  What is the difference between git and GitHub?
+
+3.  What are other version controls software/tools that are available besides git?
+:::
+
+### Additional Resources
+
+::: callout-tip
+-   [git and GitHub in the `dsbook`](https://rafalab.github.io/dsbook/git.html) by Rafael Irizarry
+:::
+
+# R session information
+
+```{r}
+options(width = 120)
+sessioninfo::session_info()
+```
