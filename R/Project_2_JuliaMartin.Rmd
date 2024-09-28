@@ -108,9 +108,60 @@ temp_plot <- df %>%
 ggplot(temp_plot, aes(date, temperature, group = temp_type, color = temp_type)) +
   geom_line() +
   facet_wrap(~city_name) + 
-  guides(color = guide_legend(title = "Temperature Type")) + scale_color_manual(labels = c("Maximum", "Minimum"), values = c("red1","blue4")) + ggtitle("Maximum and Minimum Temperatures in 5 Australian Cites from 2014-2019") + ylab("Temperature (degrees Celcius)") + xlab("Date") + labs(subtitle = str_wrap("Minimum temperatures have remained roughly stable, but Sydney is seeing a slight rise in maximum temperatures during the Summer months and Melbourne and Perth are seeing a slight decrease in maximum temperatures during the Summer")) + theme(legend.position = "bottom", title = element_text(family = "Optima"))
+  guides(color = guide_legend(title = "Temperature Type")) + scale_color_manual(labels = c("Maximum", "Minimum"), values = c("red1","blue4")) + ggtitle("Maximum and Minimum Temperatures in 5 Australian Cites from 2014-2019") + ylab("Temperature (degrees Celcius)") + xlab("Year") + labs(subtitle = str_wrap("Minimum temperatures have remained roughly stable, but Sydney is seeing a slight rise in maximum temperatures during the Summer months and Melbourne and Perth are seeing a slight decrease in maximum temperatures during the Summer"), caption = "Made by Julia Martin") + theme(legend.position = "bottom", title = element_text(family = "Optima"))
+```
+
+### Part 3B: Plotting Rainfall Over Time  
+
+I chose to design my function by first determining if the inputs are valid. If the given city and year do not appear in the dataset, an error messaged is produce letting the user know. I chose to do this at the beginning of the function because there is no use trying to filter a dataset into certain values that the variables do not take. Then, I use the inputted city and year to filter the dataset to the desired inputs and saved it as a new data farme so that it can be used in the plot function. Next, I created a histogram using the the newly created data frame. 
+
+```{r}
+rainfall_hist <- function(city_input, year_input) {
+  if(!(city_input %in% df$city_name) | !(year_input %in% df[df$city_name==city_input,]$year)) {
+    stop("Error: input does not exist in the dataset")
+  }
+  hist_data <- df %>% 
+    filter(city_name == city_input, year == year_input)
+  title <- paste("Distribution of Rainfall in", str_to_title(eval(city_input)), "in", eval(year_input),sep = " ")
+  ggplot(hist_data, aes(log(rainfall))) +
+    geom_histogram(fill="lightblue2",bins=25) + ylab("Frequency") + xlab("Log of Rainfall (in mm)") +      ggtitle(title) + labs(subtitle = "Histogram of rainfall patterns using a logarithmic scale", caption = "Made by Julia Martin")
+}
+
+rainfall_hist("PERTH", 2014)
+rainfall_hist("SYDNEY", 1984)
+# rainfall_hist("CANBERRA", 1990) # example of an invalid input
+```
+## Part 4 Apply Functions and Plot  
+
+### Part 4A
+
+```{r}
+rain_df <- df %>% 
+  filter(year >= 2014) %>% 
+  group_by(city_name, year) %>% 
+  summarize(sample_mean = sample_mean(rainfall), sample_sd = sample_sd(rainfall), lower_bound = calculate_CI(rainfall, 0.95)[1], upper_bound = calculate_CI(rainfall,0.95)[2])
+
+head(rain_df, n= 10)
+```
+
+### Part 4B  
+
+```{r}
+ggplot(rain_df, aes(year, sample_mean, color=city_name)) +
+  geom_point() + 
+  geom_line() + 
+  geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.2) + 
+  facet_wrap(~city_name) + ggtitle("Rainfall Trends in 5 Australian Cities from 2014-2019")+ theme(legend.position = "bottom", title = element_text(family = "Optima"), axis.text.x = element_text(family = "Optima"), axis.text.y = element_text(family = "Optima"), legend.text = element_text(family = "Optima"), strip.text.x = element_text(family = "Optima"))  +
+  ylab("Average Daily Rainfall (mm)") + xlab("Year") + 
+  guides(color = guide_legend(title = "City Name")) + labs(subtitle = str_wrap("Average rainfall has decreased in Brisbane beginning in 2016 and in Perth beginning in 2019, while it has remained relatively stable in Canberra, Melbourne, and Sydney", width = 100), caption = "Made by Julia Martin") 
 ```
 
 
 
 
+df[df$city_name=="CANBERRA",]
+canberra -- 2008-2012
+sydney -- 1910 ---
+perth -- 1967 --
+  brisbane -- 1965
+melbourne 1964
