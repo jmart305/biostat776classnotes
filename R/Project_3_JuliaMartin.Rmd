@@ -1,0 +1,38 @@
+---
+title: "Project_3_JuliaMartin"
+output: html_document
+date: "2024-10-08"
+---
+
+### Call necessary packages
+
+```{r}
+library(tidyverse)
+library(tidytuesdayR)
+library(usethis)
+library(here)
+library(lubridate)
+```
+
+### Load in data
+
+```{r}
+b_lyrics <- readRDS(here("data", "b_lyrics.RDS"))
+ts_lyrics <- readRDS(here("data", "ts_lyrics.RDS"))
+sales <- readRDS(here("data", "sales.RDS"))
+```
+
+## Part 1A  
+
+## 1.  
+
+```{r}
+sales %>% 
+  mutate(released = mdy(str_remove(released, "\\(([A-Z]){2}\\)\\[([0-9]){2}\\]"))) %>% 
+  mutate(sales = sales/1000000) %>% 
+  filter(country %in% c("US", "UK", "World","WW"))
+
+
+table(sales$country)
+```
+
