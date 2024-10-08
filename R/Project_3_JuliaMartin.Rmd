@@ -27,12 +27,14 @@ sales <- readRDS(here("data", "sales.RDS"))
 ## 1.  
 
 ```{r}
-sales %>% 
+sales_part1 <- sales %>% 
   mutate(released = mdy(str_remove(released, "\\(([A-Z]){2}\\)\\[([0-9]){2}\\]"))) %>% 
   mutate(sales = sales/1000000) %>% 
-  filter(country %in% c("US", "UK", "World","WW"))
-
-
-table(sales$country)
+  mutate(country = fct_collapse(country,
+     "FR" = c("FR","FRA"),
+     "World" = c("WW","World")
+     )) %>% 
+  filter(country %in% c("US", "UK", "World"))
+sales_part1
 ```
 
